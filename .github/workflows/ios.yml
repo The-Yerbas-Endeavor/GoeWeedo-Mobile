@@ -4,14 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'assets/**'
-      - 'mobile-shell/**'
-      - 'scripts/**'
-      - 'capacitor.config.ts'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/ios.yml'
   pull_request:
     branches: [main]
 
@@ -24,18 +16,20 @@ concurrency:
 
 jobs:
   ios:
-    name: Build iOS Simulator
+    name: Build current iOS simulator app
     runs-on: macos-15
     timeout-minutes: 30
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout current commit
+        uses: actions/checkout@v7
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
+          check-latest: true
+          package-manager-cache: false
 
       - name: Select Xcode 26
         run: |
@@ -53,6 +47,16 @@ jobs:
           chmod +x scripts/mobile-bootstrap.sh
           ./scripts/mobile-bootstrap.sh ios
 
+      - name: Verify current iOS configuration
+        run: |
+          test -f ios/App/App/Info.plist
+          grep -q 'NSCameraUsageDescription' ios/App/App/Info.plist
+          grep -q 'NSLocationWhenInUseUsageDescription' ios/App/App/Info.plist
+          grep -q 'NSLocationAlwaysAndWhenInUseUsageDescription' ios/App/App/Info.plist
+          node --version
+          npm --version
+          xcodebuild -version
+
       - name: Build GeoWeedo for iOS Simulator
         working-directory: ios/App
         run: |
@@ -66,22 +70,33 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             build
 
-      - name: Locate simulator app
+      - name: Stage current iOS artifact
         run: |
           APP_PATH="$(find ~/Library/Developer/Xcode/DerivedData -type d -path '*/Build/Products/Debug-iphonesimulator/App.app' | head -n 1)"
           if [[ -z "$APP_PATH" ]]; then
             echo 'GeoWeedo simulator .app was not found' >&2
             exit 1
           fi
+
           mkdir -p artifacts
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" artifacts/geoweedo-ios-simulator.zip
+          {
+            echo "GeoWeedo Mobile iOS simulator build"
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "ref=${GITHUB_REF}"
+            echo "commit=${GITHUB_SHA}"
+            echo "run=${GITHUB_RUN_NUMBER}"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "node=22"
+            xcodebuild -version | sed 's/^/xcode=/'
+          } > artifacts/BUILD-INFO.txt
           shasum -a 256 artifacts/geoweedo-ios-simulator.zip > artifacts/SHA256SUMS.txt
           ls -lh artifacts
 
       - name: Upload iOS simulator artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: geoweedo-ios-simulator-${{ github.run_number }}
+          name: geoweedo-ios-simulator-${{ github.run_number }}-${{ github.sha }}
           path: artifacts/
           if-no-files-found: error
           retention-days: 30
