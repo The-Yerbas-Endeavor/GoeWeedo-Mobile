@@ -16,12 +16,49 @@ function replaceOrFail(file, matcher, replacement, label) {
   fs.writeFileSync(file, updated);
 }
 
+function writeFileEnsured(file, content) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content);
+}
+
+function configureAndroidLauncherIcon(manifest, mascotSource) {
+  const resDir = path.join(root, 'android', 'app', 'src', 'main', 'res');
+  const drawableDir = path.join(resDir, 'drawable-nodpi');
+  const valuesDir = path.join(resDir, 'values');
+  const adaptiveDir = path.join(resDir, 'mipmap-anydpi-v26');
+  const mascotTarget = path.join(drawableDir, 'geoweedo_mascot.png');
+
+  if (!fs.existsSync(mascotSource)) {
+    console.warn('GeoWeedo mascot asset not found at assets/geoweedo-icon-master.png; keeping generated launcher icon.');
+    return fs.readFileSync(manifest, 'utf8');
+  }
+
+  fs.mkdirSync(drawableDir, { recursive: true });
+  fs.copyFileSync(mascotSource, mascotTarget);
+
+  writeFileEnsured(
+    path.join(valuesDir, 'geoweedo_launcher_colors.xml'),
+    `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="geoweedo_launcher_background">#102719</color>\n</resources>\n`,
+  );
+
+  const adaptiveIcon = `<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n    <background android:drawable="@color/geoweedo_launcher_background" />\n    <foreground>\n        <inset android:drawable="@drawable/geoweedo_mascot" android:inset="16%" />\n    </foreground>\n</adaptive-icon>\n`;
+
+  writeFileEnsured(path.join(adaptiveDir, 'geoweedo_launcher.xml'), adaptiveIcon);
+  writeFileEnsured(path.join(adaptiveDir, 'geoweedo_launcher_round.xml'), adaptiveIcon);
+
+  let xml = fs.readFileSync(manifest, 'utf8');
+  xml = xml
+    .replace(/android:icon="@[^"]+"/, 'android:icon="@mipmap/geoweedo_launcher"')
+    .replace(/android:roundIcon="@[^"]+"/, 'android:roundIcon="@mipmap/geoweedo_launcher_round"');
+
+  console.log('Configured Android adaptive GeoWeedo mascot launcher icon');
+  return xml;
+}
+
 function configureAndroid() {
   const variables = path.join(root, 'android', 'variables.gradle');
   const manifest = path.join(root, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
   const mascotSource = path.join(root, 'assets', 'geoweedo-icon-master.png');
-  const drawableDir = path.join(root, 'android', 'app', 'src', 'main', 'res', 'drawable-nodpi');
-  const mascotTarget = path.join(drawableDir, 'geoweedo_mascot.png');
 
   replaceOrFail(
     variables,
@@ -43,19 +80,10 @@ function configureAndroid() {
       .map((permission) => `    <uses-permission android:name="${permission}" />`)
       .join('\n');
     xml = xml.replace(/(<manifest\b[^>]*>)/, `$1\n${block}`);
+    fs.writeFileSync(manifest, xml);
   }
 
-  if (fs.existsSync(mascotSource)) {
-    fs.mkdirSync(drawableDir, { recursive: true });
-    fs.copyFileSync(mascotSource, mascotTarget);
-    xml = xml
-      .replace(/android:icon="@[^"]+"/, 'android:icon="@drawable/geoweedo_mascot"')
-      .replace(/android:roundIcon="@[^"]+"/, 'android:roundIcon="@drawable/geoweedo_mascot"');
-    console.log('Configured Android GeoWeedo mascot launcher icon');
-  } else {
-    console.warn('GeoWeedo mascot asset not found at assets/geoweedo-icon-master.png; keeping generated launcher icon.');
-  }
-
+  xml = configureAndroidLauncherIcon(manifest, mascotSource);
   fs.writeFileSync(manifest, xml);
   console.log('Configured Android: minSdk 26 + location/camera permissions');
 }
