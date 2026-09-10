@@ -102,10 +102,28 @@ jobs:
           sha256sum artifacts/geoweedo-debug.apk artifacts/geoweedo-release-unsigned.aab > artifacts/SHA256SUMS.txt
           ls -lh artifacts
 
-      - name: Upload Android artifacts
+      - name: Upload Android APK
         uses: actions/upload-artifact@v6
         with:
-          name: geoweedo-android-${{ github.run_number }}-${{ github.sha }}
-          path: artifacts/
+          name: geoweedo-android-apk-${{ github.run_number }}-${{ github.sha }}
+          path: artifacts/geoweedo-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Android AAB
+        uses: actions/upload-artifact@v6
+        with:
+          name: geoweedo-android-aab-${{ github.run_number }}-${{ github.sha }}
+          path: artifacts/geoweedo-release-unsigned.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Android build metadata
+        uses: actions/upload-artifact@v6
+        with:
+          name: geoweedo-android-build-info-${{ github.run_number }}-${{ github.sha }}
+          path: |
+            artifacts/BUILD-INFO.txt
+            artifacts/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
