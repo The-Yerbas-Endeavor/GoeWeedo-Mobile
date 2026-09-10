@@ -60,8 +60,13 @@ jobs:
           grep -q 'targetSdkVersion = 36' android/variables.gradle
           grep -q 'android.permission.CAMERA' android/app/src/main/AndroidManifest.xml
           grep -q 'android.permission.ACCESS_FINE_LOCATION' android/app/src/main/AndroidManifest.xml
-          grep -q '@drawable/geoweedo_mascot' android/app/src/main/AndroidManifest.xml
+          grep -q '@mipmap/geoweedo_launcher' android/app/src/main/AndroidManifest.xml
+          grep -q '@mipmap/geoweedo_launcher_round' android/app/src/main/AndroidManifest.xml
           test -s android/app/src/main/res/drawable-nodpi/geoweedo_mascot.png
+          test -s android/app/src/main/res/mipmap-anydpi-v26/geoweedo_launcher.xml
+          test -s android/app/src/main/res/mipmap-anydpi-v26/geoweedo_launcher_round.xml
+          grep -q '@drawable/geoweedo_mascot' android/app/src/main/res/mipmap-anydpi-v26/geoweedo_launcher.xml
+          grep -q '@color/geoweedo_launcher_background' android/app/src/main/res/mipmap-anydpi-v26/geoweedo_launcher.xml
           java -version
           node --version
           npm --version
@@ -92,6 +97,7 @@ jobs:
             echo "target_sdk=36"
             echo "java=21"
             echo "node=22"
+            echo "launcher_icon=adaptive-geoweedo-mascot"
           } > artifacts/BUILD-INFO.txt
           sha256sum artifacts/geoweedo-debug.apk artifacts/geoweedo-release-unsigned.aab > artifacts/SHA256SUMS.txt
           ls -lh artifacts
