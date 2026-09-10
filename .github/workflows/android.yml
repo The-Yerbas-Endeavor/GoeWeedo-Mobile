@@ -4,14 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'assets/**'
-      - 'mobile-shell/**'
-      - 'scripts/**'
-      - 'capacitor.config.ts'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/android.yml'
   pull_request:
     branches: [main]
 
@@ -24,39 +16,56 @@ concurrency:
 
 jobs:
   android:
-    name: Build APK + AAB
-    runs-on: ubuntu-latest
+    name: Build current APK + AAB
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout current commit
+        uses: actions/checkout@v7
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
+          check-latest: true
+          package-manager-cache: false
 
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Set up current Android SDK tooling
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
+      - name: Install Android API 36 build tooling
+        run: |
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Bootstrap Capacitor Android
         run: |
           chmod +x scripts/mobile-bootstrap.sh
           ./scripts/mobile-bootstrap.sh android
 
-      - name: Show Android build configuration
+      - name: Verify current Android configuration
         run: |
-          grep -nE 'minSdkVersion|compileSdkVersion|targetSdkVersion' android/variables.gradle || true
+          grep -nE 'minSdkVersion|compileSdkVersion|targetSdkVersion' android/variables.gradle
+          grep -q 'minSdkVersion = 26' android/variables.gradle
+          grep -q 'compileSdkVersion = 36' android/variables.gradle
+          grep -q 'targetSdkVersion = 36' android/variables.gradle
+          grep -q 'android.permission.CAMERA' android/app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.ACCESS_FINE_LOCATION' android/app/src/main/AndroidManifest.xml
+          grep -q '@drawable/geoweedo_mascot' android/app/src/main/AndroidManifest.xml
+          test -s android/app/src/main/res/drawable-nodpi/geoweedo_mascot.png
           java -version
           node --version
           npm --version
+          sdkmanager --version
 
       - name: Build debug APK
         working-directory: android
@@ -66,18 +75,31 @@ jobs:
         working-directory: android
         run: ./gradlew --no-daemon bundleRelease
 
-      - name: Stage artifacts
+      - name: Stage current build artifacts
         run: |
           mkdir -p artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/geoweedo-debug.apk
           cp android/app/build/outputs/bundle/release/app-release.aab artifacts/geoweedo-release-unsigned.aab
-          sha256sum artifacts/* > artifacts/SHA256SUMS.txt
+          {
+            echo "GeoWeedo Mobile Android build"
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "ref=${GITHUB_REF}"
+            echo "commit=${GITHUB_SHA}"
+            echo "run=${GITHUB_RUN_NUMBER}"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "min_sdk=26"
+            echo "compile_sdk=36"
+            echo "target_sdk=36"
+            echo "java=21"
+            echo "node=22"
+          } > artifacts/BUILD-INFO.txt
+          sha256sum artifacts/geoweedo-debug.apk artifacts/geoweedo-release-unsigned.aab > artifacts/SHA256SUMS.txt
           ls -lh artifacts
 
       - name: Upload Android artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: geoweedo-android-${{ github.run_number }}
+          name: geoweedo-android-${{ github.run_number }}-${{ github.sha }}
           path: artifacts/
           if-no-files-found: error
           retention-days: 30
