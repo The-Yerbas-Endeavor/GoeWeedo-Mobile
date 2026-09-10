@@ -1,0 +1,28 @@
+{
+  "name": "geoweedo-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "bootstrap": "bash scripts/mobile-bootstrap.sh all",
+    "bootstrap:android": "bash scripts/mobile-bootstrap.sh android",
+    "bootstrap:ios": "bash scripts/mobile-bootstrap.sh ios",
+    "sync:android": "npx cap sync android",
+    "sync:ios": "npx cap sync ios",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.0",
+    "@capacitor/app": "8.1.1",
+    "@capacitor/barcode-scanner": "3.1.2",
+    "@capacitor/core": "8.5.0",
+    "@capacitor/geolocation": "8.2.2",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/ios": "8.5.0",
+    "@capacitor/network": "8.0.1",
+    "@capacitor/share": "8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.0"
+  }
+}
