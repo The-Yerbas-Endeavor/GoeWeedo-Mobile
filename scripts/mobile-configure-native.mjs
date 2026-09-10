@@ -5,6 +5,13 @@ import path from 'node:path';
 
 const platform = process.argv[2];
 const root = process.cwd();
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+const appVersion = String(packageJson.version || '0.0.0');
+
+function androidVersionCode(version) {
+  const [major = 0, minor = 0, patch = 0] = version.split('.').map((part) => Number.parseInt(part, 10) || 0);
+  return major * 10000 + minor * 100 + patch;
+}
 
 function replaceOrFail(file, matcher, replacement, label) {
   const original = fs.readFileSync(file, 'utf8');
@@ -38,7 +45,7 @@ function configureAndroidLauncherIcon(manifest, mascotSource) {
 
   writeFileEnsured(
     path.join(valuesDir, 'geoweedo_launcher_colors.xml'),
-    `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="geoweedo_launcher_background">#102719</color>\n</resources>\n`,
+    `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="geoweedo_launcher_background">#0F1D14</color>\n</resources>\n`,
   );
 
   const adaptiveIcon = `<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n    <background android:drawable="@color/geoweedo_launcher_background" />\n    <foreground>\n        <inset android:drawable="@drawable/geoweedo_mascot" android:inset="16%" />\n    </foreground>\n</adaptive-icon>\n`;
@@ -57,14 +64,29 @@ function configureAndroidLauncherIcon(manifest, mascotSource) {
 
 function configureAndroid() {
   const variables = path.join(root, 'android', 'variables.gradle');
+  const appGradle = path.join(root, 'android', 'app', 'build.gradle');
   const manifest = path.join(root, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
   const mascotSource = path.join(root, 'assets', 'geoweedo-icon-master.png');
+  const versionCode = androidVersionCode(appVersion);
 
   replaceOrFail(
     variables,
     /minSdkVersion\s*=\s*\d+/,
     'minSdkVersion = 26',
     'Android minSdkVersion',
+  );
+
+  replaceOrFail(
+    appGradle,
+    /versionCode\s+\d+/,
+    `versionCode ${versionCode}`,
+    'Android versionCode',
+  );
+  replaceOrFail(
+    appGradle,
+    /versionName\s+["'][^"']+["']/,
+    `versionName "${appVersion}"`,
+    'Android versionName',
   );
 
   let xml = fs.readFileSync(manifest, 'utf8');
@@ -85,7 +107,7 @@ function configureAndroid() {
 
   xml = configureAndroidLauncherIcon(manifest, mascotSource);
   fs.writeFileSync(manifest, xml);
-  console.log('Configured Android: minSdk 26 + location/camera permissions');
+  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera permissions`);
 }
 
 function plistEntry(key, value) {
@@ -94,6 +116,7 @@ function plistEntry(key, value) {
 
 function configureIos() {
   const plist = path.join(root, 'ios', 'App', 'App', 'Info.plist');
+  const project = path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj');
   let xml = fs.readFileSync(plist, 'utf8');
   const entries = [
     [
@@ -117,7 +140,14 @@ function configureIos() {
     fs.writeFileSync(plist, xml);
   }
 
-  console.log('Configured iOS: location + camera privacy descriptions');
+  if (fs.existsSync(project)) {
+    let pbx = fs.readFileSync(project, 'utf8');
+    pbx = pbx.replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${appVersion};`);
+    pbx = pbx.replace(/CURRENT_PROJECT_VERSION = \d+;/g, `CURRENT_PROJECT_VERSION = ${androidVersionCode(appVersion)};`);
+    fs.writeFileSync(project, pbx);
+  }
+
+  console.log(`Configured iOS: GeoWeedo ${appVersion} + location/camera privacy descriptions`);
 }
 
 if (platform === 'android') {
