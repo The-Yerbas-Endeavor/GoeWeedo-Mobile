@@ -54,8 +54,16 @@ jobs:
 
       - name: Verify current Android configuration
         run: |
+          set -euo pipefail
           APP_VERSION="$(node -p "require('./package.json').version")"
           VERSION_CODE="$(node -e "const [a=0,b=0,c=0]=require('./package.json').version.split('.').map(Number); process.stdout.write(String(a*10000+b*100+c))")"
+          BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor/barcode-scanner/package.json').version")"
+
+          echo "@capacitor/barcode-scanner=${BARCODE_VERSION}"
+          test "${BARCODE_VERSION}" = "3.1.2"
+          test -d node_modules/@capacitor/barcode-scanner
+          grep -RqE 'capacitor-barcode-scanner|CapacitorBarcodeScanner' android
+
           grep -nE 'minSdkVersion|compileSdkVersion|targetSdkVersion' android/variables.gradle
           grep -q 'minSdkVersion = 26' android/variables.gradle
           grep -q 'compileSdkVersion = 36' android/variables.gradle
@@ -91,6 +99,7 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/geoweedo-debug.apk
           cp android/app/build/outputs/bundle/release/app-release.aab artifacts/geoweedo-release-unsigned.aab
           APP_VERSION="$(node -p "require('./package.json').version")"
+          BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor/barcode-scanner/package.json').version")"
           {
             echo "GeoWeedo Mobile Android build"
             echo "repository=${GITHUB_REPOSITORY}"
@@ -105,6 +114,7 @@ jobs:
             echo "target_sdk=36"
             echo "java=21"
             echo "node=22"
+            echo "barcode_scanner=@capacitor/barcode-scanner@${BARCODE_VERSION}"
             echo "launcher_icon=adaptive-geoweedo-mascot"
             echo "brand_theme=#0F1D14"
           } > artifacts/BUILD-INFO.txt
