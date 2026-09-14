@@ -127,6 +127,8 @@ Native plugins enabled:
   Network state
   Share sheet
   Enhanced ML Kit barcode/QR scanner
+  Native scanner zoom controls
+  Native scanner flashlight control
   Legacy barcode/QR scanner fallback
 
 Next steps:
