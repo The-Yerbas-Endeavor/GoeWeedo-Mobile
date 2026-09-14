@@ -79,6 +79,8 @@ jobs:
           grep -RqE 'capacitor-torch|TorchPlugin|Torch' android
           grep -RqE 'capacitor-camera|CameraPlugin|Camera' android
 
+          grep -Fq "url: 'https://geoweedo.com'" capacitor.config.ts
+          grep -Fq "allowNavigation: ['geoweedo.com', '*.geoweedo.com']" capacitor.config.ts
           grep -nE 'minSdkVersion|compileSdkVersion|targetSdkVersion' android/variables.gradle
           grep -q 'minSdkVersion = 26' android/variables.gradle
           grep -q 'compileSdkVersion = 36' android/variables.gradle
@@ -130,6 +132,12 @@ jobs:
             echo "run_id=${GITHUB_RUN_ID}"
             echo "app_version=${APP_VERSION}"
             echo "web_origin=https://geoweedo.com"
+            echo "web_repo=The-Yerbas-Endeavor/GeoWeedo"
+            echo "mobile_repo=The-Yerbas-Endeavor/GoeWeedo-Mobile"
+            echo "web_contract=canonical-products-v1"
+            echo "product_categories=canonical"
+            echo "dispensary_menu_categories=canonical"
+            echo "product_search=canonical-categories"
             echo "min_sdk=26"
             echo "compile_sdk=36"
             echo "target_sdk=36"
