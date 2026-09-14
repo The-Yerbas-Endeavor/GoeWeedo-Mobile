@@ -115,7 +115,7 @@ function configureAndroid() {
   fs.writeFileSync(manifest, xml);
   xml = configureAndroidLauncherIcon(manifest, mascotSource);
   fs.writeFileSync(manifest, xml);
-  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera/flashlight permissions + ML Kit barcode module`);
+  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera/flashlight permissions + ML Kit barcode module + native photo picker`);
 }
 
 function plistEntry(key, value) {
@@ -139,6 +139,14 @@ function configureIos() {
       'NSCameraUsageDescription',
       'GeoWeedo uses the camera to scan product barcodes and QR codes for GeoWeedo Facts.',
     ],
+    [
+      'NSPhotoLibraryUsageDescription',
+      'GeoWeedo lets you choose a product photo or screenshot so GeoWeedo Facts can read its barcode or QR code.',
+    ],
+    [
+      'NSPhotoLibraryAddUsageDescription',
+      'GeoWeedo may use the photo library when you choose product images for GeoWeedo Facts.',
+    ],
   ];
 
   const missing = entries.filter(([key]) => !xml.includes(`<key>${key}</key>`));
@@ -156,7 +164,7 @@ function configureIos() {
     fs.writeFileSync(project, pbx);
   }
 
-  console.log(`Configured iOS: GeoWeedo ${appVersion} + iOS 15.5 deployment target + location/camera privacy descriptions`);
+  console.log(`Configured iOS: GeoWeedo ${appVersion} + iOS 15.5 deployment target + location/camera/photo-library privacy descriptions`);
 }
 
 if (platform === 'android') {
