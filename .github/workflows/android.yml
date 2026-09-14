@@ -58,11 +58,16 @@ jobs:
           APP_VERSION="$(node -p "require('./package.json').version")"
           VERSION_CODE="$(node -e "const [a=0,b=0,c=0]=require('./package.json').version.split('.').map(Number); process.stdout.write(String(a*10000+b*100+c))")"
           BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor/barcode-scanner/package.json').version")"
+          MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
 
           echo "@capacitor/barcode-scanner=${BARCODE_VERSION}"
+          echo "@capacitor-mlkit/barcode-scanning=${MLKIT_BARCODE_VERSION}"
           test "${BARCODE_VERSION}" = "3.1.2"
+          test "${MLKIT_BARCODE_VERSION}" = "8.1.1"
           test -d node_modules/@capacitor/barcode-scanner
+          test -d node_modules/@capacitor-mlkit/barcode-scanning
           grep -RqE 'capacitor-barcode-scanner|CapacitorBarcodeScanner' android
+          grep -RqE 'capacitor-mlkit|BarcodeScannerPlugin|BarcodeScanner' android
 
           grep -nE 'minSdkVersion|compileSdkVersion|targetSdkVersion' android/variables.gradle
           grep -q 'minSdkVersion = 26' android/variables.gradle
@@ -72,6 +77,8 @@ jobs:
           grep -q "versionCode ${VERSION_CODE}" android/app/build.gradle
           grep -q 'android.permission.CAMERA' android/app/src/main/AndroidManifest.xml
           grep -q 'android.permission.ACCESS_FINE_LOCATION' android/app/src/main/AndroidManifest.xml
+          grep -q 'com.google.mlkit.vision.DEPENDENCIES' android/app/src/main/AndroidManifest.xml
+          grep -q 'android:value="barcode_ui"' android/app/src/main/AndroidManifest.xml
           grep -q '@mipmap/geoweedo_launcher' android/app/src/main/AndroidManifest.xml
           grep -q '@mipmap/geoweedo_launcher_round' android/app/src/main/AndroidManifest.xml
           test -s android/app/src/main/res/drawable-nodpi/geoweedo_mascot.png
@@ -100,6 +107,7 @@ jobs:
           cp android/app/build/outputs/bundle/release/app-release.aab artifacts/geoweedo-release-unsigned.aab
           APP_VERSION="$(node -p "require('./package.json').version")"
           BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor/barcode-scanner/package.json').version")"
+          MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
           {
             echo "GeoWeedo Mobile Android build"
             echo "repository=${GITHUB_REPOSITORY}"
@@ -114,7 +122,9 @@ jobs:
             echo "target_sdk=36"
             echo "java=21"
             echo "node=22"
-            echo "barcode_scanner=@capacitor/barcode-scanner@${BARCODE_VERSION}"
+            echo "enhanced_barcode_scanner=@capacitor-mlkit/barcode-scanning@${MLKIT_BARCODE_VERSION}"
+            echo "legacy_barcode_scanner=@capacitor/barcode-scanner@${BARCODE_VERSION}"
+            echo "scanner_auto_zoom=true"
             echo "launcher_icon=adaptive-geoweedo-mascot"
             echo "brand_theme=#0F1D14"
           } > artifacts/BUILD-INFO.txt
