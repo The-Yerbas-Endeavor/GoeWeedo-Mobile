@@ -129,6 +129,7 @@ Native plugins enabled:
   Enhanced ML Kit barcode/QR scanner
   Native scanner zoom controls
   Native scanner flashlight control
+  Native photo picker + ML Kit scan-from-photo
   Legacy barcode/QR scanner fallback
 
 Next steps:
