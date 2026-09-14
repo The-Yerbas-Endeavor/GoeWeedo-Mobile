@@ -60,19 +60,24 @@ jobs:
           BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor/barcode-scanner/package.json').version")"
           MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
           TORCH_VERSION="$(node -p "require('./node_modules/@capawesome/capacitor-torch/package.json').version")"
+          CAMERA_VERSION="$(node -p "require('./node_modules/@capacitor/camera/package.json').version")"
 
           echo "@capacitor/barcode-scanner=${BARCODE_VERSION}"
           echo "@capacitor-mlkit/barcode-scanning=${MLKIT_BARCODE_VERSION}"
           echo "@capawesome/capacitor-torch=${TORCH_VERSION}"
+          echo "@capacitor/camera=${CAMERA_VERSION}"
           test "${BARCODE_VERSION}" = "3.1.2"
           test "${MLKIT_BARCODE_VERSION}" = "8.1.1"
           test "${TORCH_VERSION}" = "8.0.2"
+          test "${CAMERA_VERSION}" = "8.0.2"
           test -d node_modules/@capacitor/barcode-scanner
           test -d node_modules/@capacitor-mlkit/barcode-scanning
           test -d node_modules/@capawesome/capacitor-torch
+          test -d node_modules/@capacitor/camera
           grep -RqE 'capacitor-barcode-scanner|CapacitorBarcodeScanner' android
           grep -RqE 'capacitor-mlkit|BarcodeScannerPlugin|BarcodeScanner' android
           grep -RqE 'capacitor-torch|TorchPlugin|Torch' android
+          grep -RqE 'capacitor-camera|CameraPlugin|Camera' android
 
           grep -nE 'minSdkVersion|compileSdkVersion|targetSdkVersion' android/variables.gradle
           grep -q 'minSdkVersion = 26' android/variables.gradle
@@ -115,6 +120,7 @@ jobs:
           BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor/barcode-scanner/package.json').version")"
           MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
           TORCH_VERSION="$(node -p "require('./node_modules/@capawesome/capacitor-torch/package.json').version")"
+          CAMERA_VERSION="$(node -p "require('./node_modules/@capacitor/camera/package.json').version")"
           {
             echo "GeoWeedo Mobile Android build"
             echo "repository=${GITHUB_REPOSITORY}"
@@ -131,11 +137,13 @@ jobs:
             echo "node=22"
             echo "enhanced_barcode_scanner=@capacitor-mlkit/barcode-scanning@${MLKIT_BARCODE_VERSION}"
             echo "native_torch=@capawesome/capacitor-torch@${TORCH_VERSION}"
+            echo "native_photo_picker=@capacitor/camera@${CAMERA_VERSION}"
             echo "legacy_barcode_scanner=@capacitor/barcode-scanner@${BARCODE_VERSION}"
             echo "scanner_primary_mode=custom-mlkit"
             echo "scanner_manual_zoom=true"
             echo "scanner_native_torch=true"
             echo "scanner_ready_ui_fallback_auto_zoom=true"
+            echo "scan_from_photo_native_mlkit=true"
             echo "launcher_icon=adaptive-geoweedo-mascot"
             echo "brand_theme=#0F1D14"
           } > artifacts/BUILD-INFO.txt
