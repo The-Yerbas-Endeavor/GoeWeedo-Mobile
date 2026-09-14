@@ -49,10 +49,20 @@ jobs:
 
       - name: Verify current iOS configuration
         run: |
+          TORCH_VERSION="$(node -p "require('./node_modules/@capawesome/capacitor-torch/package.json').version")"
+          MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
+          echo "@capawesome/capacitor-torch=${TORCH_VERSION}"
+          echo "@capacitor-mlkit/barcode-scanning=${MLKIT_BARCODE_VERSION}"
+          test "${TORCH_VERSION}" = "8.0.2"
+          test "${MLKIT_BARCODE_VERSION}" = "8.1.1"
+          test -d node_modules/@capawesome/capacitor-torch
+          test -d node_modules/@capacitor-mlkit/barcode-scanning
           test -f ios/App/App/Info.plist
           grep -q 'NSCameraUsageDescription' ios/App/App/Info.plist
           grep -q 'NSLocationWhenInUseUsageDescription' ios/App/App/Info.plist
           grep -q 'NSLocationAlwaysAndWhenInUseUsageDescription' ios/App/App/Info.plist
+          grep -RqE 'CapawesomeCapacitorTorch|TorchPlugin|capacitor-torch' ios
+          grep -RqE 'CapacitorMlkitBarcodeScanning|BarcodeScannerPlugin|barcode-scanning' ios
           node --version
           npm --version
           xcodebuild -version
@@ -80,6 +90,8 @@ jobs:
 
           mkdir -p artifacts
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" artifacts/geoweedo-ios-simulator.zip
+          MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
+          TORCH_VERSION="$(node -p "require('./node_modules/@capawesome/capacitor-torch/package.json').version")"
           {
             echo "GeoWeedo Mobile iOS simulator build"
             echo "repository=${GITHUB_REPOSITORY}"
@@ -88,6 +100,11 @@ jobs:
             echo "run=${GITHUB_RUN_NUMBER}"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "node=22"
+            echo "enhanced_barcode_scanner=@capacitor-mlkit/barcode-scanning@${MLKIT_BARCODE_VERSION}"
+            echo "native_torch=@capawesome/capacitor-torch@${TORCH_VERSION}"
+            echo "scanner_primary_mode=custom-mlkit"
+            echo "scanner_manual_zoom=true"
+            echo "scanner_native_torch=true"
             xcodebuild -version | sed 's/^/xcode=/'
           } > artifacts/BUILD-INFO.txt
           shasum -a 256 artifacts/geoweedo-ios-simulator.zip > artifacts/SHA256SUMS.txt
