@@ -94,6 +94,7 @@ function configureAndroid() {
     'android.permission.ACCESS_COARSE_LOCATION',
     'android.permission.ACCESS_FINE_LOCATION',
     'android.permission.CAMERA',
+    'android.permission.FLASHLIGHT',
   ];
 
   const missing = permissions.filter((permission) => !xml.includes(`android:name="${permission}"`));
@@ -114,7 +115,7 @@ function configureAndroid() {
   fs.writeFileSync(manifest, xml);
   xml = configureAndroidLauncherIcon(manifest, mascotSource);
   fs.writeFileSync(manifest, xml);
-  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera permissions + ML Kit barcode module`);
+  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera/flashlight permissions + ML Kit barcode module`);
 }
 
 function plistEntry(key, value) {
@@ -136,7 +137,7 @@ function configureIos() {
     ],
     [
       'NSCameraUsageDescription',
-      'GeoWeedo uses the camera to scan product barcodes and QR codes for Weedo Facts.',
+      'GeoWeedo uses the camera to scan product barcodes and QR codes for GeoWeedo Facts.',
     ],
   ];
 
