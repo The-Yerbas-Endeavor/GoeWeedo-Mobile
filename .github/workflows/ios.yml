@@ -49,6 +49,7 @@ jobs:
 
       - name: Verify current iOS configuration
         run: |
+          APP_VERSION="$(node -p "require('./package.json').version")"
           TORCH_VERSION="$(node -p "require('./node_modules/@capawesome/capacitor-torch/package.json').version")"
           MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
           CAMERA_VERSION="$(node -p "require('./node_modules/@capacitor/camera/package.json').version")"
@@ -61,6 +62,8 @@ jobs:
           test -d node_modules/@capawesome/capacitor-torch
           test -d node_modules/@capacitor-mlkit/barcode-scanning
           test -d node_modules/@capacitor/camera
+          grep -Fq "url: 'https://geoweedo.com'" capacitor.config.ts
+          grep -Fq "allowNavigation: ['geoweedo.com', '*.geoweedo.com']" capacitor.config.ts
           test -f ios/App/App/Info.plist
           grep -q 'NSCameraUsageDescription' ios/App/App/Info.plist
           grep -q 'NSPhotoLibraryUsageDescription' ios/App/App/Info.plist
@@ -70,6 +73,7 @@ jobs:
           grep -RqE 'CapawesomeCapacitorTorch|TorchPlugin|capacitor-torch' ios
           grep -RqE 'CapacitorMlkitBarcodeScanning|BarcodeScannerPlugin|barcode-scanning' ios
           grep -RqE 'CapacitorCamera|CameraPlugin|capacitor-camera' ios
+          grep -Rq "MARKETING_VERSION = ${APP_VERSION};" ios/App/App.xcodeproj/project.pbxproj
           node --version
           npm --version
           xcodebuild -version
@@ -97,6 +101,7 @@ jobs:
 
           mkdir -p artifacts
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" artifacts/geoweedo-ios-simulator.zip
+          APP_VERSION="$(node -p "require('./package.json').version")"
           MLKIT_BARCODE_VERSION="$(node -p "require('./node_modules/@capacitor-mlkit/barcode-scanning/package.json').version")"
           TORCH_VERSION="$(node -p "require('./node_modules/@capawesome/capacitor-torch/package.json').version")"
           CAMERA_VERSION="$(node -p "require('./node_modules/@capacitor/camera/package.json').version")"
@@ -107,6 +112,14 @@ jobs:
             echo "commit=${GITHUB_SHA}"
             echo "run=${GITHUB_RUN_NUMBER}"
             echo "run_id=${GITHUB_RUN_ID}"
+            echo "app_version=${APP_VERSION}"
+            echo "web_origin=https://geoweedo.com"
+            echo "web_repo=The-Yerbas-Endeavor/GeoWeedo"
+            echo "mobile_repo=The-Yerbas-Endeavor/GoeWeedo-Mobile"
+            echo "web_contract=canonical-products-v1"
+            echo "product_categories=canonical"
+            echo "dispensary_menu_categories=canonical"
+            echo "product_search=canonical-categories"
             echo "node=22"
             echo "enhanced_barcode_scanner=@capacitor-mlkit/barcode-scanning@${MLKIT_BARCODE_VERSION}"
             echo "native_torch=@capawesome/capacitor-torch@${TORCH_VERSION}"
