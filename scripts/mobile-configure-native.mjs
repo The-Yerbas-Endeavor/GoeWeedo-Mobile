@@ -102,12 +102,19 @@ function configureAndroid() {
       .map((permission) => `    <uses-permission android:name="${permission}" />`)
       .join('\n');
     xml = xml.replace(/(<manifest\b[^>]*>)/, `$1\n${block}`);
-    fs.writeFileSync(manifest, xml);
   }
 
+  if (!xml.includes('com.google.mlkit.vision.DEPENDENCIES')) {
+    xml = xml.replace(
+      /(<application\b[^>]*>)/,
+      `$1\n        <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode_ui" />`,
+    );
+  }
+
+  fs.writeFileSync(manifest, xml);
   xml = configureAndroidLauncherIcon(manifest, mascotSource);
   fs.writeFileSync(manifest, xml);
-  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera permissions`);
+  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera permissions + ML Kit barcode module`);
 }
 
 function plistEntry(key, value) {
@@ -144,10 +151,11 @@ function configureIos() {
     let pbx = fs.readFileSync(project, 'utf8');
     pbx = pbx.replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${appVersion};`);
     pbx = pbx.replace(/CURRENT_PROJECT_VERSION = \d+;/g, `CURRENT_PROJECT_VERSION = ${androidVersionCode(appVersion)};`);
+    pbx = pbx.replace(/IPHONEOS_DEPLOYMENT_TARGET = [^;]+;/g, 'IPHONEOS_DEPLOYMENT_TARGET = 15.5;');
     fs.writeFileSync(project, pbx);
   }
 
-  console.log(`Configured iOS: GeoWeedo ${appVersion} + location/camera privacy descriptions`);
+  console.log(`Configured iOS: GeoWeedo ${appVersion} + iOS 15.5 deployment target + location/camera privacy descriptions`);
 }
 
 if (platform === 'android') {
