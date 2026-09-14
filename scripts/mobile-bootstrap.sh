@@ -46,6 +46,24 @@ configure_native() {
   node scripts/mobile-configure-native.mjs "$1"
 }
 
+prepare_ios_mlkit() {
+  local podfile="$ROOT_DIR/ios/App/Podfile"
+  if [[ -f "$podfile" ]]; then
+    python3 - "$podfile" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+updated = re.sub(r"platform :ios, '[^']+'", "platform :ios, '15.5'", text)
+if updated != text:
+    path.write_text(updated)
+print('Prepared iOS 15.5 deployment target for ML Kit barcode scanning')
+PY
+  fi
+}
+
 add_android() {
   ensure_mascot_asset
 
@@ -81,6 +99,7 @@ add_ios() {
     npx cap add ios
   fi
 
+  prepare_ios_mlkit
   npx cap sync ios
   configure_native ios
   echo "iOS project ready: $ROOT_DIR/ios"
@@ -107,7 +126,8 @@ Native plugins enabled:
   Haptics
   Network state
   Share sheet
-  Barcode/QR scanner
+  Enhanced ML Kit barcode/QR scanner
+  Legacy barcode/QR scanner fallback
 
 Next steps:
   Android: npx cap open android
