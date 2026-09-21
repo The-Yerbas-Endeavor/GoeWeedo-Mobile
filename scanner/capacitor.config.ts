@@ -1,7 +1,7 @@
 const config = {
   appId: 'com.geoweedo.scanner',
   appName: 'GeoWeedo Scanner',
-  webDir: '../mobile-shell',
+  webDir: 'mobile-shell',
   server: {
     url: 'https://geoweedo.com/scanner/app',
     cleartext: false,
