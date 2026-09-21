@@ -49,7 +49,9 @@ Current mobile web origin:
 https://geoweedo.com
 ```
 
-Current mobile build line: `0.4.1`.
+Current mobile build line: `0.4.2`.
+
+Current canonical GeoWeedo web revision: `83f895b98452e986c543ea0f600a9ccb8bb12a34` (2026-09-21).
 
 When GeoWeedo web-only behavior changes, such as product categories or dispensary menu presentation, the mobile apps receive that behavior from the live production site and should not copy the same business logic into this repository. A mobile release bump is still useful when we want fresh APK/AAB/iOS artifacts that explicitly represent the current production web contract.
 
