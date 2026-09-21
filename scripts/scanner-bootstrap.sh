@@ -12,7 +12,12 @@ if [[ -f "$ROOT_DIR/package-lock.json" ]]; then
 fi
 cp "$ROOT_DIR/scanner/capacitor.config.ts" "$WORK_DIR/capacitor.config.ts"
 cp -R "$ROOT_DIR/mobile-shell" "$WORK_DIR/mobile-shell"
-cp -R "$ROOT_DIR/assets" "$WORK_DIR/assets"
+if [[ -d "$ROOT_DIR/assets" ]]; then
+  cp -R "$ROOT_DIR/assets" "$WORK_DIR/assets"
+else
+  mkdir -p "$WORK_DIR/assets"
+  echo "Shared assets directory not present; continuing without packaged launcher asset."
+fi
 cp -R "$ROOT_DIR/scripts" "$WORK_DIR/scripts"
 cd "$WORK_DIR"
 if [[ -f package-lock.json ]]; then
