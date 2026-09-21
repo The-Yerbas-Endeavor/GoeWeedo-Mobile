@@ -1,0 +1,74 @@
+name: GeoWeedo Scanner iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scanner/**'
+      - 'scripts/scanner-bootstrap.sh'
+      - 'scripts/mobile-configure-native.mjs'
+      - 'mobile-shell/**'
+      - 'assets/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/scanner-ios.yml'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: geoweedo-scanner-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    name: Build GeoWeedo Scanner iOS simulator
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          check-latest: true
+          package-manager-cache: false
+      - name: Select Xcode 26
+        run: |
+          XCODE_APP="$(find /Applications -maxdepth 1 -type d -name 'Xcode_26*.app' | sort | tail -n 1)"
+          test -n "$XCODE_APP"
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+      - name: Bootstrap scanner iOS
+        run: |
+          chmod +x scripts/scanner-bootstrap.sh
+          ./scripts/scanner-bootstrap.sh ios
+      - name: Verify scanner identity
+        working-directory: scanner/build
+        run: |
+          grep -Fq "appId: 'com.geoweedo.scanner'" capacitor.config.ts
+          grep -Fq "appName: 'GeoWeedo Scanner'" capacitor.config.ts
+          grep -Fq "url: 'https://geoweedo.com/scanner/app'" capacitor.config.ts
+          grep -Rq 'com.geoweedo.scanner' ios
+          test -f ios/App/App/Info.plist
+          grep -q 'NSCameraUsageDescription' ios/App/App/Info.plist
+          grep -RqE 'CapacitorMlkitBarcodeScanning|BarcodeScannerPlugin|barcode-scanning' ios
+      - name: Build simulator app
+        working-directory: scanner/build/ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+      - name: Stage artifact
+        run: |
+          APP_PATH="$(find ~/Library/Developer/Xcode/DerivedData -type d -path '*/Build/Products/Debug-iphonesimulator/App.app' | head -n 1)"
+          test -n "$APP_PATH"
+          mkdir -p artifacts/scanner
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" artifacts/scanner/geoweedo-scanner-ios-simulator.zip
+          printf '%s\n'             "GeoWeedo Scanner iOS simulator"             "app_id=com.geoweedo.scanner"             "app_name=GeoWeedo Scanner"             "web_origin=https://geoweedo.com/scanner/app"             "commit=${GITHUB_SHA}" > artifacts/scanner/BUILD-INFO.txt
+          shasum -a 256 artifacts/scanner/geoweedo-scanner-ios-simulator.zip > artifacts/scanner/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: geoweedo-scanner-ios-simulator-${{ github.run_number }}-${{ github.sha }}
+          path: artifacts/scanner/
+          retention-days: 30
