@@ -7,13 +7,19 @@ WORK_DIR="$SCANNER_DIR/build"
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR"
 cp "$ROOT_DIR/package.json" "$WORK_DIR/package.json"
-cp "$ROOT_DIR/package-lock.json" "$WORK_DIR/package-lock.json"
+if [[ -f "$ROOT_DIR/package-lock.json" ]]; then
+  cp "$ROOT_DIR/package-lock.json" "$WORK_DIR/package-lock.json"
+fi
 cp "$ROOT_DIR/scanner/capacitor.config.ts" "$WORK_DIR/capacitor.config.ts"
 cp -R "$ROOT_DIR/mobile-shell" "$WORK_DIR/mobile-shell"
 cp -R "$ROOT_DIR/assets" "$WORK_DIR/assets"
 cp -R "$ROOT_DIR/scripts" "$WORK_DIR/scripts"
 cd "$WORK_DIR"
-npm ci
+if [[ -f package-lock.json ]]; then
+  npm ci
+else
+  npm install --no-package-lock
+fi
 case "$PLATFORM" in
   android)
     npx cap add android
