@@ -34,11 +34,15 @@ case "$PLATFORM" in
   ios)
     [[ "$(uname -s)" == "Darwin" ]] || { echo "iOS scanner builds require macOS" >&2; exit 1; }
     npx cap add ios
-    python3 - ios/App/Podfile <<'PY'
+    if [[ -f ios/App/Podfile ]]; then
+      python3 - ios/App/Podfile <<'PY'
 from pathlib import Path
 import re, sys
 p=Path(sys.argv[1]); t=p.read_text(); p.write_text(re.sub(r"platform :ios, '[^']+'", "platform :ios, '15.5'", t))
 PY
+    else
+      echo "No CocoaPods Podfile generated; Capacitor is using Swift Package Manager."
+    fi
     npx cap sync ios
     node scripts/mobile-configure-native.mjs ios
     ;;
