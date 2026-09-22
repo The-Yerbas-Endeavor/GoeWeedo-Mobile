@@ -7,17 +7,21 @@ permissions:
   contents: read
 jobs:
   geoweedo:
+    name: OG GeoWeedo iOS
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: {node-version: '22'}
       - run: chmod +x scripts/build-ios.sh && scripts/build-ios.sh geoweedo
+      - name: Name OG GeoWeedo build
+        run: mv geoweedo-ios-simulator.zip og-geoweedo-ios-simulator.zip
       - uses: actions/upload-artifact@v6
         with:
-          name: geoweedo-ios-simulator
-          path: geoweedo-ios-simulator.zip
+          name: og-geoweedo-ios
+          path: og-geoweedo-ios-simulator.zip
   scanner:
+    name: Scanner iOS
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
@@ -26,5 +30,5 @@ jobs:
       - run: chmod +x scripts/build-ios.sh && scripts/build-ios.sh scanner
       - uses: actions/upload-artifact@v6
         with:
-          name: geoweedo-scanner-ios-simulator
+          name: scanner-ios
           path: scanner-ios-simulator.zip
