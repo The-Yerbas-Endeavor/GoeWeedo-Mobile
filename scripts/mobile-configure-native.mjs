@@ -91,8 +91,6 @@ function configureAndroid() {
 
   let xml = fs.readFileSync(manifest, 'utf8');
   const permissions = [
-    'android.permission.INTERNET',
-    'android.permission.ACCESS_NETWORK_STATE',
     'android.permission.ACCESS_COARSE_LOCATION',
     'android.permission.ACCESS_FINE_LOCATION',
     'android.permission.CAMERA',
@@ -117,8 +115,7 @@ function configureAndroid() {
   fs.writeFileSync(manifest, xml);
   xml = configureAndroidLauncherIcon(manifest, mascotSource);
   fs.writeFileSync(manifest, xml);
-
-  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + network/location/camera/flashlight permissions + ML Kit barcode module + native photo picker`);
+  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera/flashlight permissions + ML Kit barcode module + native photo picker`);
 }
 
 function plistEntry(key, value) {
