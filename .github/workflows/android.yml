@@ -7,6 +7,7 @@ permissions:
   contents: read
 jobs:
   geoweedo:
+    name: OG GeoWeedo Android
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -17,13 +18,19 @@ jobs:
       - uses: android-actions/setup-android@v4
       - run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
       - run: chmod +x scripts/build-app.sh && scripts/build-app.sh geoweedo
+      - name: Name OG GeoWeedo builds
+        run: |
+          mkdir -p artifacts
+          cp build/geoweedo/android/app/build/outputs/apk/debug/app-debug.apk artifacts/og-geoweedo-debug.apk
+          cp build/geoweedo/android/app/build/outputs/bundle/release/app-release.aab artifacts/og-geoweedo-release.aab
       - uses: actions/upload-artifact@v6
         with:
-          name: geoweedo-android
+          name: og-geoweedo-android
           path: |
-            build/geoweedo/android/app/build/outputs/apk/debug/app-debug.apk
-            build/geoweedo/android/app/build/outputs/bundle/release/app-release.aab
+            artifacts/og-geoweedo-debug.apk
+            artifacts/og-geoweedo-release.aab
   scanner:
+    name: Scanner Android
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -34,9 +41,14 @@ jobs:
       - uses: android-actions/setup-android@v4
       - run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
       - run: chmod +x scripts/build-app.sh && scripts/build-app.sh scanner
+      - name: Name Scanner builds
+        run: |
+          mkdir -p artifacts
+          cp build/scanner/android/app/build/outputs/apk/debug/app-debug.apk artifacts/scanner-debug.apk
+          cp build/scanner/android/app/build/outputs/bundle/release/app-release.aab artifacts/scanner-release.aab
       - uses: actions/upload-artifact@v6
         with:
-          name: geoweedo-scanner-android
+          name: scanner-android
           path: |
-            build/scanner/android/app/build/outputs/apk/debug/app-debug.apk
-            build/scanner/android/app/build/outputs/bundle/release/app-release.aab
+            artifacts/scanner-debug.apk
+            artifacts/scanner-release.aab
