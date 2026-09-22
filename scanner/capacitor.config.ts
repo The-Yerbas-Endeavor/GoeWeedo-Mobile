@@ -3,7 +3,7 @@ const config = {
   appName: 'GeoWeedo Scanner',
   webDir: 'mobile-shell',
   server: {
-    url: 'https://geoweedo.com/scanner/app',
+    url: 'https://geoweedo.com/facts',
     cleartext: false,
     allowNavigation: ['geoweedo.com', '*.geoweedo.com'],
   },
