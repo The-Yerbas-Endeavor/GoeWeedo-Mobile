@@ -14,4 +14,4 @@ npx cap add android
 grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml
 npx cap sync android
 cd android
-./gradlew --no-daemon assembleDebug
+./gradlew --no-daemon assembleDebug bundleRelease
