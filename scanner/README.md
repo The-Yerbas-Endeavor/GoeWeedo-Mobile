@@ -4,7 +4,7 @@ Scanner-only companion app built from the same native repository as the full Geo
 
 - App name: `GeoWeedo Scanner`
 - Package / bundle ID: `com.geoweedo.scanner`
-- Web route: `https://geoweedo.com/scanner/app`
+- Web route: `https://geoweedo.com/facts`
 
 Public users can scan without signing in. Authenticated dispensary owners plus approved moderators, ambassadors and admins can receive server-authorized product contribution capabilities. GeoWeedo remains authoritative for products, brands, batches, COAs, dispensaries, accounts and permissions.
 
