@@ -91,6 +91,8 @@ function configureAndroid() {
 
   let xml = fs.readFileSync(manifest, 'utf8');
   const permissions = [
+    'android.permission.INTERNET',
+    'android.permission.ACCESS_NETWORK_STATE',
     'android.permission.ACCESS_COARSE_LOCATION',
     'android.permission.ACCESS_FINE_LOCATION',
     'android.permission.CAMERA',
