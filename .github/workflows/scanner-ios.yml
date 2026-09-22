@@ -50,7 +50,7 @@ jobs:
         run: |
           grep -Fq "appId: 'com.geoweedo.scanner'" capacitor.config.ts
           grep -Fq "appName: 'GeoWeedo Scanner'" capacitor.config.ts
-          grep -Fq "url: 'https://geoweedo.com/scanner/app'" capacitor.config.ts
+          grep -Fq "url: 'https://geoweedo.com/facts'" capacitor.config.ts
           grep -Rq 'com.geoweedo.scanner' ios
           test -f ios/App/App/Info.plist
           grep -q 'NSCameraUsageDescription' ios/App/App/Info.plist
@@ -65,7 +65,7 @@ jobs:
           test -n "$APP_PATH"
           mkdir -p artifacts/scanner
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" artifacts/scanner/geoweedo-scanner-ios-simulator.zip
-          printf '%s\n'             "GeoWeedo Scanner iOS simulator"             "app_id=com.geoweedo.scanner"             "app_name=GeoWeedo Scanner"             "web_origin=https://geoweedo.com/scanner/app"             "commit=${GITHUB_SHA}" > artifacts/scanner/BUILD-INFO.txt
+          printf '%s\n'             "GeoWeedo Scanner iOS simulator"             "app_id=com.geoweedo.scanner"             "app_name=GeoWeedo Scanner"             "web_origin=https://geoweedo.com/facts"             "commit=${GITHUB_SHA}" > artifacts/scanner/BUILD-INFO.txt
           shasum -a 256 artifacts/scanner/geoweedo-scanner-ios-simulator.zip > artifacts/scanner/SHA256SUMS.txt
       - uses: actions/upload-artifact@v6
         with:
