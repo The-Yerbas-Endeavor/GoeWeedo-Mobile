@@ -117,7 +117,68 @@ function configureAndroid() {
   fs.writeFileSync(manifest, xml);
   xml = configureAndroidLauncherIcon(manifest, mascotSource);
   fs.writeFileSync(manifest, xml);
-  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + location/camera/flashlight permissions + ML Kit barcode module + native photo picker`);
+
+  // Replace Capacitor's generic WebView error page with a diagnostic page that
+  // exposes the actual failing URL and Chromium/WebView error description.
+  const mainActivity = path.join(root, 'android', 'app', 'src', 'main', 'java', ...String(packageJson.name || '').split('.'));
+  const javaRoot = path.join(root, 'android', 'app', 'src', 'main', 'java');
+  const activityFiles = [];
+  function walk(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name === 'MainActivity.java') activityFiles.push(full);
+    }
+  }
+  walk(javaRoot);
+  if (activityFiles.length === 1) {
+    const activity = activityFiles[0];
+    const source = fs.readFileSync(activity, 'utf8');
+    const packageLine = source.match(/^package\\s+[^;]+;/m)?.[0] || '';
+    const diagnostic = `${packageLine}
+
+import android.os.Bundle;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Toast;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    WebView webView = getBridge().getWebView();
+    final WebViewClient capacitorClient = webView.getWebViewClient();
+    webView.setWebViewClient(new WebViewClient() {
+      @Override
+      public void onPageFinished(WebView view, String url) {
+        super.onPageFinished(view, url);
+      }
+
+      @Override
+      public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+        if (request.isForMainFrame()) {
+          String message = "GeoWeedo load failed\\n" +
+            "URL: " + request.getUrl() + "\\n" +
+            "Error " + error.getErrorCode() + ": " + error.getDescription();
+          Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+        }
+        super.onReceivedError(view, request, error);
+      }
+    });
+  }
+}
+`;
+    fs.writeFileSync(activity, diagnostic);
+    console.log('Configured Android WebView main-frame error diagnostics');
+  } else {
+    console.warn(`Expected one MainActivity.java, found ${activityFiles.length}; diagnostics not installed.`);
+  }
+
+  console.log(`Configured Android: GeoWeedo ${appVersion} (${versionCode}) + minSdk 26 + network/location/camera/flashlight permissions + ML Kit barcode module + native photo picker`);
 }
 
 function plistEntry(key, value) {
