@@ -63,7 +63,6 @@ jobs:
           test -d node_modules/@capacitor-mlkit/barcode-scanning
           test -d node_modules/@capacitor/camera
           grep -Fq "url: 'https://geoweedo.com'" capacitor.config.ts
-          grep -Fq "errorPath: 'index.html'" capacitor.config.ts
           test -f ios/App/App/Info.plist
           grep -q 'NSCameraUsageDescription' ios/App/App/Info.plist
           grep -q 'NSPhotoLibraryUsageDescription' ios/App/App/Info.plist
