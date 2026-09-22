@@ -54,6 +54,7 @@ jobs:
           grep -Fq "appId: 'com.geoweedo.scanner'" capacitor.config.ts
           grep -Fq "appName: 'GeoWeedo Scanner'" capacitor.config.ts
           grep -Fq "url: 'https://geoweedo.com/facts'" capacitor.config.ts
+          grep -Fq "errorPath: 'index.html'" scanner/capacitor.config.ts
           grep -Rq 'com.geoweedo.scanner' android
           grep -q 'android.permission.CAMERA' android/app/src/main/AndroidManifest.xml
           grep -RqE 'capacitor-mlkit|BarcodeScannerPlugin|BarcodeScanner' android
