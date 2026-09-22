@@ -5,7 +5,7 @@ const config = {
   server: {
     url: 'https://geoweedo.com',
     cleartext: false,
-    errorPath: 'index.html',
+    allowNavigation: ['geoweedo.com', '*.geoweedo.com'],
   },
   android: {
     allowMixedContent: false,
