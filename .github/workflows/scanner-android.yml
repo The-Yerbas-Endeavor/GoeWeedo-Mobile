@@ -53,7 +53,7 @@ jobs:
         run: |
           grep -Fq "appId: 'com.geoweedo.scanner'" capacitor.config.ts
           grep -Fq "appName: 'GeoWeedo Scanner'" capacitor.config.ts
-          grep -Fq "url: 'https://geoweedo.com/scanner/app'" capacitor.config.ts
+          grep -Fq "url: 'https://geoweedo.com/facts'" capacitor.config.ts
           grep -Rq 'com.geoweedo.scanner' android
           grep -q 'android.permission.CAMERA' android/app/src/main/AndroidManifest.xml
           grep -RqE 'capacitor-mlkit|BarcodeScannerPlugin|BarcodeScanner' android
@@ -68,7 +68,7 @@ jobs:
           mkdir -p artifacts/scanner
           cp scanner/build/android/app/build/outputs/apk/debug/app-debug.apk artifacts/scanner/geoweedo-scanner-debug.apk
           cp scanner/build/android/app/build/outputs/bundle/release/app-release.aab artifacts/scanner/geoweedo-scanner-release-unsigned.aab
-          printf '%s\n'             "GeoWeedo Scanner Android"             "app_id=com.geoweedo.scanner"             "app_name=GeoWeedo Scanner"             "web_origin=https://geoweedo.com/scanner/app"             "commit=${GITHUB_SHA}" > artifacts/scanner/BUILD-INFO.txt
+          printf '%s\n'             "GeoWeedo Scanner Android"             "app_id=com.geoweedo.scanner"             "app_name=GeoWeedo Scanner"             "web_origin=https://geoweedo.com/facts"             "commit=${GITHUB_SHA}" > artifacts/scanner/BUILD-INFO.txt
           sha256sum artifacts/scanner/*.apk artifacts/scanner/*.aab > artifacts/scanner/SHA256SUMS.txt
       - uses: actions/upload-artifact@v6
         with:
