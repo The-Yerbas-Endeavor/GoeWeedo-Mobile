@@ -1,4 +1,4 @@
-name: Fresh iOS Apps
+name: iOS — Scanner + OG GeoWeedo
 on:
   workflow_dispatch:
   push:
