@@ -87,6 +87,8 @@ jobs:
           grep -q 'targetSdkVersion = 36' android/variables.gradle
           grep -q "versionName \"${APP_VERSION}\"" android/app/build.gradle
           grep -q "versionCode ${VERSION_CODE}" android/app/build.gradle
+          grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.ACCESS_NETWORK_STATE' android/app/src/main/AndroidManifest.xml
           grep -q 'android.permission.CAMERA' android/app/src/main/AndroidManifest.xml
           grep -q 'android.permission.FLASHLIGHT' android/app/src/main/AndroidManifest.xml
           grep -q 'android.permission.ACCESS_FINE_LOCATION' android/app/src/main/AndroidManifest.xml
