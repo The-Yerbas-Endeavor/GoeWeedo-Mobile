@@ -1,4 +1,4 @@
-name: Fresh Android Apps
+name: Android — Scanner + OG GeoWeedo
 on:
   workflow_dispatch:
   push:
