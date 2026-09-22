@@ -1,0 +1,30 @@
+name: Fresh iOS Apps
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  geoweedo:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: {node-version: '22'}
+      - run: chmod +x scripts/build-ios.sh && scripts/build-ios.sh geoweedo
+      - uses: actions/upload-artifact@v6
+        with:
+          name: geoweedo-ios-simulator
+          path: geoweedo-ios-simulator.zip
+  scanner:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: {node-version: '22'}
+      - run: chmod +x scripts/build-ios.sh && scripts/build-ios.sh scanner
+      - uses: actions/upload-artifact@v6
+        with:
+          name: geoweedo-scanner-ios-simulator
+          path: scanner-ios-simulator.zip
