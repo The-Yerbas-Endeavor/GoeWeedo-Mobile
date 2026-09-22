@@ -56,6 +56,8 @@ jobs:
           grep -Fq "url: 'https://geoweedo.com/facts'" capacitor.config.ts
           grep -Fq "errorPath: 'index.html'" capacitor.config.ts
           grep -Rq 'com.geoweedo.scanner' android
+          grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.ACCESS_NETWORK_STATE' android/app/src/main/AndroidManifest.xml
           grep -q 'android.permission.CAMERA' android/app/src/main/AndroidManifest.xml
           grep -RqE 'capacitor-mlkit|BarcodeScannerPlugin|BarcodeScanner' android
       - name: Build debug APK
